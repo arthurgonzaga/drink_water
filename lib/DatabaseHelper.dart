@@ -1,3 +1,5 @@
+import 'package:sqflite/sqflite.dart';
+
 ///  This are the columns for the table [tableWater]
 
 final String tableWater = 'water_table';
@@ -81,4 +83,59 @@ class User{
     goal= map[columnGoal];
   }
 
+}
+
+class WaterProcessProvider{
+
+  Database db;
+
+  Future open(String path) async{
+
+    db = await openDatabase(
+        path, version: 1,
+      onCreate: (Database db, int version) async {
+        '''
+        create table $tableWater ( 
+          $columnDayOfTheWeek integer primary key autoincrement, 
+          $columnDrank double not null,
+          $columnPercentage double not null,
+          $columnNeedToDrink double not null
+          $columnReachedGoal bool not null
+          )
+        ''';
+      });
+  }
+
+  Future<WaterProcess> insert(WaterProcess waterProcess) async {
+    waterProcess.dayOfTheWeek = await db.insert(tableWater, waterProcess.toMap());
+    return waterProcess;
+  }
+
+  Future<WaterProcess> getTodo(int day) async {
+    List<Map> maps = await db.query(tableWater,
+        columns: [
+          columnDayOfTheWeek,
+          columnDrank,
+          columnPercentage,
+          columnNeedToDrink,
+          columnReachedGoal
+        ],
+        where: '$columnDayOfTheWeek = ?',
+        whereArgs: [day]);
+    if (maps.length > 0) {
+      return WaterProcess.fromMap(maps.first);
+    }
+    return null;
+  }
+
+  Future<int> delete(int day) async {
+    return await db.delete(tableWater, where: '$columnDayOfTheWeek = ?', whereArgs: [day]);
+  }
+
+  Future<int> update(WaterProcess waterProcess) async {
+    return await db.update(tableWater, waterProcess.toMap(),
+        where: '$columnDayOfTheWeek = ?', whereArgs: [waterProcess.dayOfTheWeek]);
+  }
+
+  Future close() async => db.close();
 }
