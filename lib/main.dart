@@ -9,12 +9,16 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
+import 'chart.dart';
+
 FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
 
 double drank, needToDrink, percentage, goal;
 int today;
 List<double> types = [0.1, 0.2, 0.3];
+
+List daysDrank;
 
 
 void main() async{
@@ -41,7 +45,7 @@ class MyAppState extends State<MyApp> {
   }
 
   PageController pageControllerWater = PageController(initialPage: 0);
-  PageController pageControler = PageController();
+  PageController pageController = PageController();
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +61,10 @@ class MyAppState extends State<MyApp> {
           body: Stack(
             children: [
               PageView(
-                controller: pageControler,
+                onPageChanged: (int index){
+                  getAllDaysDrank();
+                },
+                controller: pageController,
                 children: [
                   Center(
                     child: Column(
@@ -143,35 +150,52 @@ class MyAppState extends State<MyApp> {
                       ],
                     ),
                   ),
-                  Center(
-                    child: Text("hehege"),
-                  )
+                  Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(32.0),
+                          child: BarChartSample1(),
+                        ),
+                        FloatingActionButton.extended(
+                          icon: Icon(Icons.settings),
+                            onPressed: (){
+
+                            },
+                            label: Text("Settings")
+                        )
+                      ],
+                    )
                 ],
               ),
               Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    SmoothPageIndicator(
-                        controller: pageControler,  // PageController
-                        count:  2,
-                        axisDirection: Axis.horizontal,
-                        effect:  SwapEffect(
-                          dotHeight: 10,
-                          dotWidth: 10,
-                          activeDotColor: Color.fromRGBO(102, 180, 255, 1),
-                          dotColor: Color.fromRGBO(102, 180, 255, 0.3),
+                child: Container(
+                  margin: EdgeInsets.only(bottom: 32),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      SmoothPageIndicator(
+                          controller: pageController,  // PageController
+                          count:  2,
+                          axisDirection: Axis.horizontal,
+                          effect:  SwapEffect(
+                            dotHeight: 10,
+                            spacing: 8,
+                            dotWidth: 10,
+                            activeDotColor: Color.fromRGBO(102, 180, 255, 1),
+                            dotColor: Color.fromRGBO(102, 180, 255, 0.3),
 
-                        ),  // your preferred effect
-                        onDotClicked: (index){
-                          pageControler.animateToPage(
-                              index,
-                              duration: new Duration(milliseconds: 50),
-                              curve: null
-                          );
-                        }
-                    ),
-                  ],
+                          ),  // your preferred effect
+                          onDotClicked: (index){
+                            pageController.animateToPage(
+                                index,
+                                duration: new Duration(seconds: 1),
+                                curve: Curves.linearToEaseOut
+                            );
+                          }
+                      ),
+                    ],
+                  ),
                 ),
               )
             ]
@@ -210,11 +234,22 @@ Future<List<double>> getData() async{
   return [drank, needToDrink, percentage, goal];
 }
 
+Future<List<dynamic>> getAllDaysDrank() async{
+  List data = [];
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  for(int i=0;i<=6;i++){
+    data.add(prefs.getDouble("drank$i"));
+    print(data);
+  }
+  return data;
+}
+
 void updateData() async{
   SharedPreferences prefs = await SharedPreferences.getInstance();
   prefs.setDouble("drank$today", drank);
   prefs.setDouble("needToDrink$today", needToDrink);
   prefs.setDouble("percentage$today", percentage);
+  prefs.setDouble("goal", goal ?? 2.0);
 }
 
 void resetData(SharedPreferences prefs){
