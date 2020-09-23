@@ -10,14 +10,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
-double drank;
-double needToDrink;
-double percentage;
+
+double drank, needToDrink, percentage, goal;
 int today;
 List<double> types = [0.1, 0.2, 0.3];
-final double goal = 2.0;
 
-void main(){
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp());
 }
 
@@ -73,32 +72,30 @@ class MyAppState extends State<MyApp> {
                   width: 200.0,
                   height: 200.0,
                   child: FutureBuilder(
-                    future: getData(today), // TODO: implement the database
+                    future: getData(),
                     builder: (context, snapshot) {
-                      if(snapshot.connectionState == ConnectionState.waiting){
-                        return Center(
-                          child: Text("loading..."),
-                        );
-                      }else{
+                      if(snapshot.hasData){
+                        //[drank, needToDrink, percentage, goal]
                         return LiquidCircularProgressIndicator(
-                          value: percentage, // Defaults to 0.5.
+                          value: snapshot.data[2], // Defaults to 0.5.
                           valueColor: AlwaysStoppedAnimation(Color.fromRGBO(102, 180, 255, 1)), // Defaults to the current Theme's accentColor.
                           backgroundColor: Colors.transparent, // Defaults to the current Theme's backgroundColor.
                           borderColor: Color.fromRGBO(102, 180, 255, 1),
                           borderWidth: 4.5,
                           direction: Axis.vertical, // The direction the liquid moves (Axis.vertical = bottom to top, Axis.horizontal = left to right). Defaults to Axis.vertical.
                           center: Text(
-                            "$drank L",
+                            "${snapshot.data[0]} L",
                             style: TextStyle(
-                                color: percentage > 0.45 ? Colors.white : Color.fromRGBO(102, 180, 255, 1),
+                                color: (snapshot.data[2]) > 0.45 ? Colors.white : Color.fromRGBO(102, 180, 255, 1),
                                 fontWeight: FontWeight.bold,
                                 fontSize: 25
                             ),
                           ),
                         );
+                      }else{
+                        return Container(width: 0,height: 0,);
                       }
                     },
-
                   )
                 ),
                 // Parte de baixo
@@ -144,11 +141,8 @@ class MyAppState extends State<MyApp> {
 
   }
 
-  void changePage(){
-
-  }
-
   void addLiters(int index){
+
     setState(() {
       drank += types[index];
       percentage = drank/goal;
@@ -156,11 +150,44 @@ class MyAppState extends State<MyApp> {
       drank = num.parse(drank.toStringAsFixed(2));
       percentage = num.parse(percentage.toStringAsFixed(2));
       needToDrink = num.parse(needToDrink.toStringAsFixed(2));
-      saveData(today);
+      updateData();
     });
   }
 
 
+}
+
+Future<List<double>> getData() async{
+  today = getDayByName();
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+
+  resetData(prefs);
+
+  drank = (prefs.getDouble('drank$today') ?? 0);
+  goal = (prefs.getDouble('goal') ?? 2.0);
+  needToDrink = (prefs.getDouble('needToDrink$today') ?? goal);
+  percentage = (prefs.getDouble('percentage$today') ?? 0);
+  return [drank, needToDrink, percentage, goal];
+}
+
+void updateData() async{
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  prefs.setDouble("drank$today", drank);
+  prefs.setDouble("needToDrink$today", needToDrink);
+  prefs.setDouble("percentage$today", percentage);
+}
+
+void resetData(SharedPreferences prefs){
+  if(today == 6){
+    prefs.setBool("update", true);
+  }else if(today != 6 && prefs.getBool("update")==true){
+    prefs.setBool("update", false);
+    for(int i=0;i<=6; i++){
+      prefs.setDouble("drank$i", 0);
+      prefs.setDouble("needToDrink$i", goal);
+      prefs.setDouble("percentage$i", 0);
+    }
+  }
 }
 
 Future<void> initNotification() async {
@@ -188,7 +215,6 @@ Future<void> setNotification(double needToDrink) async {
     "Drink water, Babe ❤",
     "Water time, Sweetie ❤"
   ];
-
 
   var time = DateTime.now().add(Duration(seconds: 2));
   var android = AndroidNotificationDetails(
@@ -238,7 +264,7 @@ int getDayByName(){
     case 'Sat':
       return 5;
       break;
-    case 'Mon':
+    case 'Sun':
       return 6;
       break;
   }
