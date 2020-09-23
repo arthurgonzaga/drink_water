@@ -1,4 +1,4 @@
-# drink_watter
+# drink_water
 
 An app to drink water
 
