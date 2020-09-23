@@ -7,6 +7,7 @@ import 'package:liquid_progress_indicator/liquid_progress_indicator.dart';
 import 'package:drink_watter/card_water_amount.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
@@ -15,8 +16,8 @@ double drank, needToDrink, percentage, goal;
 int today;
 List<double> types = [0.1, 0.2, 0.3];
 
+
 void main() async{
-  WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp());
 }
 
@@ -39,7 +40,8 @@ class MyAppState extends State<MyApp> {
     initNotification();
   }
 
-  PageController pageController = PageController(initialPage: 0);
+  PageController pageControllerWater = PageController(initialPage: 0);
+  PageController pageControler = PageController();
 
   @override
   Widget build(BuildContext context) {
@@ -52,90 +54,128 @@ class MyAppState extends State<MyApp> {
         ),
         home: Scaffold(
           backgroundColor: Color.fromRGBO(212, 237,255 , 1),
-          body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 32),
-                  child: Text(
-                    "Adrielly",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        color: Color.fromRGBO(26, 143, 255, 1),
-                        fontSize: 40.0,
-                        fontWeight: FontWeight.w900
-                    ),
-                  ),
-                ),
-                Container(
-                  width: 200.0,
-                  height: 200.0,
-                  child: FutureBuilder(
-                    future: getData(),
-                    builder: (context, snapshot) {
-                      if(snapshot.hasData){
-                        //[drank, needToDrink, percentage, goal]
-                        return LiquidCircularProgressIndicator(
-                          value: snapshot.data[2], // Defaults to 0.5.
-                          valueColor: AlwaysStoppedAnimation(Color.fromRGBO(102, 180, 255, 1)), // Defaults to the current Theme's accentColor.
-                          backgroundColor: Colors.transparent, // Defaults to the current Theme's backgroundColor.
-                          borderColor: Color.fromRGBO(102, 180, 255, 1),
-                          borderWidth: 4.5,
-                          direction: Axis.vertical, // The direction the liquid moves (Axis.vertical = bottom to top, Axis.horizontal = left to right). Defaults to Axis.vertical.
-                          center: Text(
-                            "${snapshot.data[0]} L",
+          body: Stack(
+            children: [
+              PageView(
+                controller: pageControler,
+                children: [
+                  Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 32),
+                          child: Text(
+                            "Adrielly",
+                            textAlign: TextAlign.center,
                             style: TextStyle(
-                                color: (snapshot.data[2]) > 0.45 ? Colors.white : Color.fromRGBO(102, 180, 255, 1),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 25
+                                color: Color.fromRGBO(26, 143, 255, 1),
+                                fontSize: 40.0,
+                                fontWeight: FontWeight.w900
                             ),
                           ),
-                        );
-                      }else{
-                        return Container(width: 0,height: 0,);
-                      }
-                    },
-                  )
-                ),
-                // Parte de baixo
-                Column(
-                  children: [
-                    // White Card
-                    Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Color.fromRGBO(0, 0, 0, 0.1),
-                              offset: Offset(0,5),
-                              blurRadius: 5,
-                            )
-                          ]
-                      ),
-                      child: CardWater(pageController)
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(top: 20),
-                      child: FloatingActionButton(
-                        onPressed: (){
-                          addLiters(pageController.page.toInt());
-                          setNotification(needToDrink);
-                        },
-                        child: Icon(
-                            Icons.send,
-                          size: 20,
                         ),
-                      ),
-                    )
-                  ]
+                        Container(
+                            width: 200.0,
+                            height: 200.0,
+                            child: FutureBuilder(
+                              future: getData(),
+                              builder: (context, snapshot) {
+                                if(snapshot.hasData){
+                                  //[drank, needToDrink, percentage, goal]
+                                  return LiquidCircularProgressIndicator(
+                                    value: snapshot.data[2], // Defaults to 0.5.
+                                    valueColor: AlwaysStoppedAnimation(Color.fromRGBO(102, 180, 255, 1)), // Defaults to the current Theme's accentColor.
+                                    backgroundColor: Colors.transparent, // Defaults to the current Theme's backgroundColor.
+                                    borderColor: Color.fromRGBO(102, 180, 255, 1),
+                                    borderWidth: 4.5,
+                                    direction: Axis.vertical, // The direction the liquid moves (Axis.vertical = bottom to top, Axis.horizontal = left to right). Defaults to Axis.vertical.
+                                    center: Text(
+                                      "${snapshot.data[0]} L",
+                                      style: TextStyle(
+                                          color: (snapshot.data[2]) > 0.45 ? Colors.white : Color.fromRGBO(102, 180, 255, 1),
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 25
+                                      ),
+                                    ),
+                                  );
+                                }else{
+                                  return Container(width: 0,height: 0,);
+                                }
+                              },
+                            )
+                        ),
+                        // Parte de baixo
+                        Column(
+                            children: [
+                              // White Card
+                              Container(
+                                  width: 120,
+                                  height: 120,
+                                  decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(8),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Color.fromRGBO(0, 0, 0, 0.1),
+                                          offset: Offset(0,5),
+                                          blurRadius: 5,
+                                        )
+                                      ]
+                                  ),
+                                  child: CardWater(pageControllerWater)
+                              ),
+                              Container(
+                                margin: EdgeInsets.only(top: 20,bottom: 40),
+                                child: FloatingActionButton(
+                                  onPressed: (){
+                                    addLiters(pageControllerWater.page.toInt());
+                                    setNotification(needToDrink);
+                                  },
+                                  child: Icon(
+                                    Icons.send,
+                                    size: 20,
+                                  ),
+                                ),
+                              )
+                            ]
+                        ),
+                      ],
+                    ),
+                  ),
+                  Center(
+                    child: Text("hehege"),
+                  )
+                ],
+              ),
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    SmoothPageIndicator(
+                        controller: pageControler,  // PageController
+                        count:  2,
+                        axisDirection: Axis.horizontal,
+                        effect:  SwapEffect(
+                          dotHeight: 10,
+                          dotWidth: 10,
+                          activeDotColor: Color.fromRGBO(102, 180, 255, 1),
+                          dotColor: Color.fromRGBO(102, 180, 255, 0.3),
+
+                        ),  // your preferred effect
+                        onDotClicked: (index){
+                          pageControler.animateToPage(
+                              index,
+                              duration: new Duration(milliseconds: 50),
+                              curve: null
+                          );
+                        }
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              )
+            ]
+          )
         ),
     );
 
