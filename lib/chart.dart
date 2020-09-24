@@ -55,7 +55,7 @@ class BarChartSample1State extends State<BarChartSample1> {
                 children: <Widget>[
                   Center(
                     child: Text(
-                      'Semana',
+                      'Week',
                       style: TextStyle(
 
                           color: Color.fromRGBO(26, 143, 255, 1), fontSize: 24, fontWeight: FontWeight.bold),
@@ -131,19 +131,14 @@ class BarChartSample1State extends State<BarChartSample1> {
   List<BarChartGroupData> showingGroups() => List.generate(7, (i) {
       switch (i) {
         case 0:
-          print(daysDrank[i]);
           return makeGroupData(0, daysDrank[i], isTouched: i == touchedIndex);
         case 1:
-          print(daysDrank[i]);
           return makeGroupData(1, num.parse(daysDrank[i].toStringAsFixed(2)), isTouched: i == touchedIndex);
         case 2:
-          print(daysDrank[i]);
           return makeGroupData(2, num.parse(daysDrank[i].toStringAsFixed(2)), isTouched: i == touchedIndex);
         case 3:
-          print(daysDrank[i]);
           return makeGroupData(3, num.parse(daysDrank[i].toStringAsFixed(2)), isTouched: i == touchedIndex);
         case 4:
-          print(daysDrank[i]);
           return makeGroupData(4, num.parse(daysDrank[i].toStringAsFixed(2)), isTouched: i == touchedIndex);
         case 5:
           return makeGroupData(5, num.parse(daysDrank[i].toStringAsFixed(2)), isTouched: i == touchedIndex);
