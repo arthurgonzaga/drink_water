@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:drink_watter/settings.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -16,7 +17,7 @@ FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
 double drank, needToDrink, percentage, goal;
 int today;
-List<double> types = [0.1, 0.2, 0.3];
+List<double> types = [0.1, 0.15, 0.2, 0.25, 0.3];
 
 List daysDrank;
 
@@ -58,132 +59,145 @@ class MyAppState extends State<MyApp> {
         ),
         home: Scaffold(
           backgroundColor: Color.fromRGBO(212, 237,255 , 1),
-          body: Stack(
-            children: [
-              PageView(
-                onPageChanged: (int index){
-                  getAllDaysDrank();
-                },
-                controller: pageController,
+          body: Builder(
+
+            builder: (context) => Stack(
                 children: [
-                  Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(top: 32),
-                          child: Text(
-                            "Adrielly",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                color: Color.fromRGBO(26, 143, 255, 1),
-                                fontSize: 40.0,
-                                fontWeight: FontWeight.w900
+                  PageView(
+                    onPageChanged: (int index){
+                      //getAllDaysDrank();
+                    },
+                    controller: pageController,
+                    children: [
+                      Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(top: 32),
+                              child: Text(
+                                "Adrielly",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    color: Color.fromRGBO(26, 143, 255, 1),
+                                    fontSize: 40.0,
+                                    fontWeight: FontWeight.w900
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                        Container(
-                            width: 200.0,
-                            height: 200.0,
-                            child: FutureBuilder(
-                              future: getData(),
-                              builder: (context, snapshot) {
-                                if(snapshot.hasData){
-                                  //[drank, needToDrink, percentage, goal]
-                                  return LiquidCircularProgressIndicator(
-                                    value: snapshot.data[2], // Defaults to 0.5.
-                                    valueColor: AlwaysStoppedAnimation(Color.fromRGBO(102, 180, 255, 1)), // Defaults to the current Theme's accentColor.
-                                    backgroundColor: Colors.transparent, // Defaults to the current Theme's backgroundColor.
-                                    borderColor: Color.fromRGBO(102, 180, 255, 1),
-                                    borderWidth: 4.5,
-                                    direction: Axis.vertical, // The direction the liquid moves (Axis.vertical = bottom to top, Axis.horizontal = left to right). Defaults to Axis.vertical.
-                                    center: Text(
-                                      "${snapshot.data[0]} L",
-                                      style: TextStyle(
-                                          color: (snapshot.data[2]) > 0.45 ? Colors.white : Color.fromRGBO(102, 180, 255, 1),
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 25
+                            Container(
+                                width: 200.0,
+                                height: 200.0,
+                                child: FutureBuilder(
+                                  future: getData(),
+                                  builder: (context, snapshot) {
+                                    if(snapshot.hasData){
+                                      //[drank, needToDrink, percentage, goal]
+                                      return LiquidCircularProgressIndicator(
+                                        value: snapshot.data[2], // Defaults to 0.5.
+                                        valueColor: AlwaysStoppedAnimation(Color.fromRGBO(102, 180, 255, 1)), // Defaults to the current Theme's accentColor.
+                                        backgroundColor: Colors.transparent, // Defaults to the current Theme's backgroundColor.
+                                        borderColor: Color.fromRGBO(102, 180, 255, 1),
+                                        borderWidth: 4.5,
+                                        direction: Axis.vertical, // The direction the liquid moves (Axis.vertical = bottom to top, Axis.horizontal = left to right). Defaults to Axis.vertical.
+                                        center: Text(
+                                          "${snapshot.data[0]} L",
+                                          style: TextStyle(
+                                              color: (snapshot.data[2]) > 0.45 ? Colors.white : Color.fromRGBO(102, 180, 255, 1),
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 25
+                                          ),
+                                        ),
+                                      );
+                                    }else{
+                                      return Container(width: 0,height: 0,);
+                                    }
+                                  },
+                                )
+                            ),
+                            // Parte de baixo
+                            Column(
+                                children: [
+                                  // White Card
+                                  Container(
+                                      width: 120,
+                                      height: 120,
+                                      decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(8),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Color.fromRGBO(0, 0, 0, 0.1),
+                                              offset: Offset(0,5),
+                                              blurRadius: 5,
+                                            )
+                                          ]
+                                      ),
+                                      child: CardWater(pageControllerWater)
+                                  ),
+                                  Container(
+                                    margin: EdgeInsets.only(top: 20,bottom: 40),
+                                    child: FloatingActionButton(
+                                      onPressed: (){
+                                        addLiters(pageControllerWater.page.toInt());
+                                        setNotification(needToDrink);
+                                      },
+                                      child: Icon(
+                                        Icons.send,
+                                        size: 20,
                                       ),
                                     ),
+                                  )
+                                ]
+                            ),
+                          ],
+                        ),
+                      ),
+                      Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(32.0),
+                              child: BarChartSample1(),
+                            ),
+                            FloatingActionButton.extended(
+                              icon: Icon(Icons.settings),
+                                onPressed: () async {
+                                  final result = await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => Settings()
+                                      )
                                   );
-                                }else{
-                                  return Container(width: 0,height: 0,);
-                                }
-                              },
-                            )
-                        ),
-                        // Parte de baixo
-                        Column(
-                            children: [
-                              // White Card
-                              Container(
-                                  width: 120,
-                                  height: 120,
-                                  decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(8),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Color.fromRGBO(0, 0, 0, 0.1),
-                                          offset: Offset(0,5),
-                                          blurRadius: 5,
-                                        )
-                                      ]
-                                  ),
-                                  child: CardWater(pageControllerWater)
-                              ),
-                              Container(
-                                margin: EdgeInsets.only(top: 20,bottom: 40),
-                                child: FloatingActionButton(
-                                  onPressed: (){
-                                    addLiters(pageControllerWater.page.toInt());
-                                    setNotification(needToDrink);
-                                  },
-                                  child: Icon(
-                                    Icons.send,
-                                    size: 20,
-                                  ),
-                                ),
-                              )
-                            ]
-                        ),
-                      ],
-                    ),
-                  ),
-                  Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(32.0),
-                          child: BarChartSample1(),
-                        ),
-                        FloatingActionButton.extended(
-                          icon: Icon(Icons.settings),
-                            onPressed: (){
 
-                            },
-                            label: Text("Settings")
+                                  if(result){
+                                    setState(() {
+                                      getData();
+                                    });
+                                  }
+                                },
+                                label: Text("Settings")
+                            )
+                          ],
                         )
-                      ],
-                    )
-                ],
-              ),
-              Center(
-                child: Container(
-                  margin: EdgeInsets.only(bottom: 32),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      SmoothPageIndicator(
-                          controller: pageController,  // PageController
-                          count:  2,
-                          axisDirection: Axis.horizontal,
-                          effect:  SwapEffect(
-                            dotHeight: 10,
-                            spacing: 8,
-                            dotWidth: 10,
-                            activeDotColor: Color.fromRGBO(102, 180, 255, 1),
-                            dotColor: Color.fromRGBO(102, 180, 255, 0.3),
+                    ],
+                  ),
+                  Center(
+                    child: Container(
+                      margin: EdgeInsets.only(bottom: 32),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          SmoothPageIndicator(
+                              controller: pageController,  // PageController
+                              count:  2,
+                              axisDirection: Axis.horizontal,
+                              effect:  SwapEffect(
+                                dotHeight: 10,
+                                spacing: 8,
+                                dotWidth: 10,
+                                activeDotColor: Color.fromRGBO(102, 180, 255, 1),
+                                dotColor: Color.fromRGBO(102, 180, 255, 0.3),
 
                           ),  // your preferred effect
                           onDotClicked: (index){
@@ -200,7 +214,6 @@ class MyAppState extends State<MyApp> {
               )
             ]
           )
-        ),
     );
 
   }
