@@ -199,20 +199,22 @@ class MyAppState extends State<MyApp> {
                                 activeDotColor: Color.fromRGBO(102, 180, 255, 1),
                                 dotColor: Color.fromRGBO(102, 180, 255, 0.3),
 
-                          ),  // your preferred effect
-                          onDotClicked: (index){
-                            pageController.animateToPage(
-                                index,
-                                duration: new Duration(seconds: 1),
-                                curve: Curves.linearToEaseOut
-                            );
-                          }
+                              ),  // your preferred effect
+                              onDotClicked: (index){
+                                pageController.animateToPage(
+                                    index,
+                                    duration: new Duration(seconds: 1),
+                                    curve: Curves.linearToEaseOut
+                                );
+                              }
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-              )
-            ]
+                    ),
+                  )
+                ]
+              ),
+            ),
           )
     );
 
@@ -220,6 +222,12 @@ class MyAppState extends State<MyApp> {
 
   void addLiters(int index){
 
+    if(drank >= goal){
+      setState(() {
+
+      });
+      return;
+    }
     setState(() {
       drank += types[index];
       percentage = drank/goal;
@@ -252,7 +260,7 @@ Future<List<dynamic>> getAllDaysDrank() async{
   SharedPreferences prefs = await SharedPreferences.getInstance();
   for(int i=0;i<=6;i++){
     data.add(prefs.getDouble("drank$i"));
-    print(data);
+    //print(data);
   }
   return data;
 }
@@ -303,6 +311,10 @@ Future<void> setNotification(double needToDrink) async {
     "Drink water, Babe ❤",
     "Water time, Sweetie ❤"
   ];
+
+  if(drank >= goal){
+    return null;
+  }
 
   var time = DateTime.now().add(Duration(seconds: 2));
   var android = AndroidNotificationDetails(
