@@ -37,12 +37,10 @@ class MyApp extends StatefulWidget{
 class MyAppState extends State<MyApp> {
 
 
-
-
   @override
   void initState() {
-    super.initState();
     initNotification();
+    super.initState();
   }
 
   PageController pageControllerWater = PageController(initialPage: 0);
@@ -158,23 +156,28 @@ class MyAppState extends State<MyApp> {
                           children: [
                             Padding(
                               padding: const EdgeInsets.all(32.0),
-                              child: BarChartSample1(),
+                              child: FutureBuilder(
+                                future: getAllDaysDrank(),
+                                builder: (context, snapshot) {
+                                  if(snapshot.hasData){
+                                    return Chart(snapshot.data, goal);
+                                  }
+                                },
+                              )
                             ),
                             FloatingActionButton.extended(
                               icon: Icon(Icons.settings),
                                 onPressed: () async {
-                                  final result = await Navigator.push(
+                                  Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => Settings()
-                                      )
-                                  );
+                                          builder: (context) => Settings(),
+                                      ),
 
-                                  if(result){
-                                    setState(() {
-                                      getData();
-                                    });
-                                  }
+                                  );
+                                  setState(() {
+                                    resetManually();
+                                  });
                                 },
                                 label: Text("Settings")
                             )
@@ -258,6 +261,7 @@ Future<List<double>> getData() async{
 Future<List<dynamic>> getAllDaysDrank() async{
   List data = [];
   SharedPreferences prefs = await SharedPreferences.getInstance();
+  goal = prefs.getDouble("goal");
   for(int i=0;i<=6;i++){
     data.add(prefs.getDouble("drank$i"));
     //print(data);
@@ -278,6 +282,18 @@ void resetData(SharedPreferences prefs){
     prefs.setBool("update", true);
   }else if(today != 6 && prefs.getBool("update")==true){
     prefs.setBool("update", false);
+    for(int i=0;i<=6; i++){
+      prefs.setDouble("drank$i", 0);
+      prefs.setDouble("needToDrink$i", goal);
+      prefs.setDouble("percentage$i", 0);
+    }
+  }
+}
+
+void resetManually() async{
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  if(prefs.getBool("reset_manually")==true){
+    prefs.setBool("reset_manually", false);
     for(int i=0;i<=6; i++){
       prefs.setDouble("drank$i", 0);
       prefs.setDouble("needToDrink$i", goal);

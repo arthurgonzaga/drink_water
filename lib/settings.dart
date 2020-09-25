@@ -29,12 +29,7 @@ class SettingsState extends State<Settings>{
     return MaterialApp(
         debugShowCheckedModeBanner: false,
 
-        home: new WillPopScope(
-          onWillPop: () async{
-            // TODO: implement onBackPressed
-            return Future.value(true);
-          },
-          child: Scaffold(
+        home: Scaffold(
             backgroundColor: Color.fromRGBO(212, 237,255 , 1),
             body: SafeArea(
               child: Column(
@@ -66,7 +61,7 @@ class SettingsState extends State<Settings>{
                             icon: Icon(Icons.refresh,
                                 size: 32,
                                 color: Color.fromRGBO(26, 143, 255, 1)),
-                            onPressed: (){
+                            onPressed: () async{
                               resetData();
                             }),
                       ],
@@ -95,7 +90,6 @@ class SettingsState extends State<Settings>{
               ),
             ),
       ),
-        ),
     );
   }}
 
@@ -143,5 +137,5 @@ int getDayByName(){
 
 Future<void> resetData() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  prefs.setBool("update", true);
+  prefs.setBool("reset_manually", true);
 }
