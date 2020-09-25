@@ -1,19 +1,20 @@
-import 'dart:async';
-
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-List daysDrank = [0.0,0.0,0.0,0.0,0.0,0.0,0.0];
-double goal;
 
-class BarChartSample1 extends StatefulWidget {
+class Chart extends StatefulWidget {
+
+  List daysDrank;
+  double goal;
+
+  Chart(this.daysDrank, this.goal);
+
 
   @override
-  State<StatefulWidget> createState() => BarChartSample1State();
+  State<StatefulWidget> createState() => _ChartState();
 }
 
-class BarChartSample1State extends State<BarChartSample1> {
+class _ChartState extends State<Chart> {
   final Color barBackgroundColor = Colors.white;
   final Duration animDuration = const Duration(milliseconds: 250);
 
@@ -23,16 +24,6 @@ class BarChartSample1State extends State<BarChartSample1> {
   @override
   void initState() {
     super.initState();
-    getAllDaysDrank().then((value){
-      setState(() {
-        daysDrank = value;
-      });
-    });
-    getGoal().then((value){
-      setState(() {
-        goal = value;
-      });
-    });
   }
 
   @override
@@ -101,7 +92,7 @@ class BarChartSample1State extends State<BarChartSample1> {
           width: width,
           backDrawRodData: BackgroundBarChartRodData(
             show: true,
-            y: goal,
+            y: widget.goal,
             color: Color.fromRGBO(26, 143, 255, 0.1),
           ),
         ),
@@ -110,40 +101,22 @@ class BarChartSample1State extends State<BarChartSample1> {
     );
   }
 
-
-  Future<List<dynamic>> getAllDaysDrank() async{
-    List data = [];
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    for(int i=0;i<=6;i++){
-      data.add(prefs.getDouble("drank$i"));
-      //print(data);
-    }
-    return data;
-  }
-
-  Future<double> getGoal() async{
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    goal = prefs.getDouble("goal") ?? 2.0;
-    return goal;
-  }
-
-
   List<BarChartGroupData> showingGroups() => List.generate(7, (i) {
       switch (i) {
         case 0:
-          return makeGroupData(0, daysDrank[i], isTouched: i == touchedIndex);
+          return makeGroupData(0, widget.daysDrank[i], isTouched: i == touchedIndex);
         case 1:
-          return makeGroupData(1, num.parse(daysDrank[i].toStringAsFixed(2)), isTouched: i == touchedIndex);
+          return makeGroupData(1, num.parse(widget.daysDrank[i].toStringAsFixed(2)), isTouched: i == touchedIndex);
         case 2:
-          return makeGroupData(2, num.parse(daysDrank[i].toStringAsFixed(2)), isTouched: i == touchedIndex);
+          return makeGroupData(2, num.parse(widget.daysDrank[i].toStringAsFixed(2)), isTouched: i == touchedIndex);
         case 3:
-          return makeGroupData(3, num.parse(daysDrank[i].toStringAsFixed(2)), isTouched: i == touchedIndex);
+          return makeGroupData(3, num.parse(widget.daysDrank[i].toStringAsFixed(2)), isTouched: i == touchedIndex);
         case 4:
-          return makeGroupData(4, num.parse(daysDrank[i].toStringAsFixed(2)), isTouched: i == touchedIndex);
+          return makeGroupData(4, num.parse(widget.daysDrank[i].toStringAsFixed(2)), isTouched: i == touchedIndex);
         case 5:
-          return makeGroupData(5, num.parse(daysDrank[i].toStringAsFixed(2)), isTouched: i == touchedIndex);
+          return makeGroupData(5, num.parse(widget.daysDrank[i].toStringAsFixed(2)), isTouched: i == touchedIndex);
         case 6:
-          return makeGroupData(6, num.parse(daysDrank[i].toStringAsFixed(2)), isTouched: i == touchedIndex);
+          return makeGroupData(6, num.parse(widget.daysDrank[i].toStringAsFixed(2)), isTouched: i == touchedIndex);
         default:
           return null;
       }
@@ -160,31 +133,31 @@ class BarChartSample1State extends State<BarChartSample1> {
               switch (group.x.toInt()) {
                 case 0:
                   weekDay = 'Monday';
-                  drank = daysDrank[0];
+                  drank = widget.daysDrank[0];
                   break;
                 case 1:
                   weekDay = 'Tuesday';
-                  drank = daysDrank[1];
+                  drank = widget.daysDrank[1];
                   break;
                 case 2:
                   weekDay = 'Wednesday';
-                  drank = daysDrank[2];
+                  drank = widget.daysDrank[2];
                   break;
                 case 3:
                   weekDay = 'Thursday';
-                  drank = daysDrank[3];
+                  drank = widget.daysDrank[3];
                   break;
                 case 4:
                   weekDay = 'Friday';
-                  drank = daysDrank[4];
+                  drank = widget.daysDrank[4];
                   break;
                 case 5:
                   weekDay = 'Saturday';
-                  drank = daysDrank[5];
+                  drank = widget.daysDrank[5];
                   break;
                 case 6:
                   weekDay = 'Sunday';
-                  drank = daysDrank[6];
+                  drank = widget.daysDrank[6];
                   break;
               }
               return BarTooltipItem(
