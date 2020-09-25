@@ -161,6 +161,8 @@ class MyAppState extends State<MyApp> {
                                 builder: (context, snapshot) {
                                   if(snapshot.hasData){
                                     return Chart(snapshot.data, goal);
+                                  }else{
+                                    return Container();
                                   }
                                 },
                               )

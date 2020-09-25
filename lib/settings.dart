@@ -16,12 +16,14 @@ class Settings extends StatefulWidget{
 
 
 class SettingsState extends State<Settings>{
+  
+  final controllerHeight = TextEditingController();
+  final controllerWeight = TextEditingController();
 
 
   @override
   void initState() {
     super.initState();
-
   }
 
   @override
@@ -68,74 +70,126 @@ class SettingsState extends State<Settings>{
 
                     ),
                   ),
-                  Container(
-                    margin: EdgeInsets.symmetric(horizontal: 32, vertical: 10),
-                    child: TextFormField(
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                          labelText: 'Type your Height'
-                      ),
-                    ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.symmetric(horizontal: 32, vertical: 10),
-                    child: TextFormField(
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                          labelText: 'Type your Weight'
-                      ),
-                    ),
-                  )
+                  FutureBuilder(
+                    future: getData(),
+
+                      // Snapshot is list like: [height, weight, bmi, goal];
+                      builder: (context, snapshot) {
+                        if(snapshot.hasData){
+                          controllerWeight.text = snapshot.data[0].toString();
+                          controllerHeight.text = snapshot.data[1].toString();
+                          return SafeArea(
+                            child: Column(
+                              children: [
+                                Container(
+                                  margin: EdgeInsets.symmetric(horizontal: 32, vertical: 10),
+                                  child: TextFormField(
+                                    controller: controllerHeight,
+                                    keyboardType: TextInputType.number,
+                                    decoration: InputDecoration(
+                                        labelText: 'Type your Height',
+                                      
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  margin: EdgeInsets.symmetric(horizontal: 32, vertical: 10),
+                                  child: TextFormField(
+                                    controller: controllerWeight,
+                                    keyboardType: TextInputType.number,
+                                    decoration: InputDecoration(
+                                        labelText: 'Type your Weight'
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  margin: EdgeInsets.only(top: 20),
+                                  child: RaisedButton(
+                                    onPressed: (){
+                                      saveData(context);
+                                    },
+                                    color: Colors.blue,
+                                    child: Text("Save",style: TextStyle(color: Colors.white),),
+                                  ),
+                                )
+                              ],
+                            ),
+                          );
+                        }else{
+                          return Container();
+                        }
+                  })
                 ],
               ),
             ),
       ),
     );
-  }}
-
-
-Future<List<double>> getData() async{
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-
-  height = (prefs.getDouble('height') ?? 1.69);
-  weight = (prefs.getDouble('weight') ?? 73);
-  bmi = (prefs.getDouble('bmi') ?? (weight/sqrt(height)));
-  goal = (prefs.getDouble('goal') ?? 2.0);
-}
-
-
-int getDayByName(){
-  DateTime now = DateTime.now();
-  DateFormat dateFormat = DateFormat.E();
-  String string = dateFormat.format(now);
-
-
-  switch(string){
-    case 'Mon':
-      return 0;
-      break;
-    case 'Tue':
-      return 1;
-      break;
-    case 'Wed':
-      return 2;
-      break;
-    case 'Thu':
-      return 3;
-      break;
-    case 'Fri':
-      return 4;
-      break;
-    case 'Sat':
-      return 5;
-      break;
-    case 'Sun':
-      return 6;
-      break;
   }
+
+
+  Future<List<double>> getData() async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    height = (prefs.getDouble('height') ?? 1.69);
+    weight = (prefs.getDouble('weight') ?? 73);
+    bmi = (prefs.getDouble('bmi') ?? (weight/sqrt(height)));
+    goal = (prefs.getDouble('goal') ?? 2.0);
+
+    //print([height, weight, bmi, goal]);
+    return [height, weight, bmi, goal];
+  }
+
+  Future<void> saveData(BuildContext context) async{
+    // Todo: fix some bugs here (update and round the numbers)
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setDouble("height", double.parse(controllerHeight.text));
+    prefs.setDouble("weight", double.parse(controllerWeight.text));
+    prefs.setDouble("bmi",
+        double.parse(controllerWeight.text)/sqrt(double.parse(controllerHeight.text)));
+    prefs.setDouble("goal", 0.035 * double.parse(controllerWeight.text));
+
+    Scaffold.of(context).showSnackBar(
+      SnackBar(content: Text("Saved Successfully"))
+    );
+  }
+
+
+  int getDayByName(){
+    DateTime now = DateTime.now();
+    DateFormat dateFormat = DateFormat.E();
+    String string = dateFormat.format(now);
+
+
+    switch(string){
+      case 'Mon':
+        return 0;
+        break;
+      case 'Tue':
+        return 1;
+        break;
+      case 'Wed':
+        return 2;
+        break;
+      case 'Thu':
+        return 3;
+        break;
+      case 'Fri':
+        return 4;
+        break;
+      case 'Sat':
+        return 5;
+        break;
+      case 'Sun':
+        return 6;
+        break;
+    }
+  }
+
+  Future<void> resetData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool("reset_manually", true);
+  }
+
 }
 
-Future<void> resetData() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  prefs.setBool("reset_manually", true);
-}
+
