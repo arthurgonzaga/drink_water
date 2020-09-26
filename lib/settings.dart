@@ -168,7 +168,17 @@ class SettingsState extends State<Settings>{
   }
 
   Future<void> saveData(BuildContext context) async{
-    // Todo: fix some bugs here (update and round the numbers)
+
+    // The body needs 35ml for every 1kg of the body
+    goal = 0.035 * num.parse(double.parse(controllerWeight.text).toStringAsFixed(1));
+    height = num.parse(controllerHeight.text) * 100;
+    weight = num.parse(controllerWeight.text);
+
+    // Todo: fix the BMI bug...
+    bmi = weight/(height*height);
+    print([height, weight, bmi, goal]);
+
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setDouble("weight", weight);
     prefs.setDouble("height", height);
