@@ -32,6 +32,7 @@ class SettingsState extends State<Settings>{
         debugShowCheckedModeBanner: false,
 
         home: Scaffold(
+          resizeToAvoidBottomPadding: false,
             backgroundColor: Color.fromRGBO(212, 237,255 , 1),
             body: SafeArea(
               child: Column(
@@ -124,21 +125,83 @@ class SettingsState extends State<Settings>{
                                         style: TextStyle(color: Colors.blue),
                                         children: [
                                           TextSpan(text:"You need to drink "),
-                                          TextSpan(text:"${goal.toStringAsFixed(1)} Liters\n\n", style: TextStyle(
+                                          TextSpan(text:"${goal.toStringAsFixed(1)} Liters\n", style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                             color: Colors.blue,
                                             fontSize: 21
                                           )),
                                           TextSpan(text:"Your BMI is "),
-                                          TextSpan(text:"${bmi.toStringAsFixed(2)}", style: TextStyle(
+                                          TextSpan(text:"${bmi.toStringAsFixed(1)}", style: TextStyle(
                                               fontWeight: FontWeight.bold,
                                               color: Colors.blue,
                                               fontSize: 21
                                           )),
-                                        ]
+                                        ],
                                       ),
+                                      textAlign: TextAlign.center,
                                     ),
                                   ),
+                                ),
+                                SizedBox(height: 20,),
+                                FlatButton(
+                                    onPressed: (){
+                                      showDialog(
+                                          context: context,
+                                        barrierDismissible: true,
+                                        builder: (_){
+                                            var style = TextStyle(
+                                                fontWeight: FontWeight.w700,
+                                                color: Colors.black);
+
+                                          return AlertDialog(
+                                              elevation: 2,
+
+                                              backgroundColor: Colors.white,
+                                              title: Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                children:[
+                                                  Text(
+                                                    "IMC - Situation",
+                                                    style: TextStyle(
+                                                      color: Colors.blue,
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ]
+                                              ),
+                                            content: Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                              children: [
+                                                Column(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    Text("16 to 19.9",style: style),
+                                                    Text("20 to 24.9",style: style),
+                                                    Text("25 to 29.9",style: style),
+                                                    Text("30 to 39.9",style: style),
+                                                    Text(">40",style: style),
+                                                  ],
+                                                ),
+                                                Column(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    Text("Underweight",style: style),
+                                                    Text("Normal",style: style),
+                                                    Text("Overweight",style: style),
+                                                    Text("Obese",style: style),
+                                                    Text("Extremely Obese",style: style),
+                                                  ],
+                                                )
+                                              ],
+                                            )
+                                          );
+                                        }
+                                      );
+                                    },
+                                    child: Text(
+                                        "HELP",
+                                      style: TextStyle(color: Colors.blueGrey),
+                                    )
                                 )
                               ],
                             ),
@@ -146,7 +209,7 @@ class SettingsState extends State<Settings>{
                         }else{
                           return Container();
                         }
-                  })
+                  }),
                 ],
               ),
             ),
@@ -170,13 +233,12 @@ class SettingsState extends State<Settings>{
   Future<void> saveData(BuildContext context) async{
 
     // The body needs 35ml for every 1kg of the body
-    goal = 0.035 * num.parse(double.parse(controllerWeight.text).toStringAsFixed(1));
-    height = num.parse(controllerHeight.text) * 100;
-    weight = num.parse(controllerWeight.text);
+    goal = 0.035 * double.parse(double.parse(controllerWeight.text).toStringAsFixed(1));
+    height = double.parse(controllerHeight.text);
+    weight = double.parse(controllerWeight.text);
 
-    // Todo: fix the BMI bug...
-    bmi = weight/(height*height);
-    print([height, weight, bmi, goal]);
+    double heightSquared = height*height;
+    bmi = weight/heightSquared;
 
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -188,6 +250,9 @@ class SettingsState extends State<Settings>{
     Scaffold.of(context).showSnackBar(
       SnackBar(content: Text("Saved Successfully"))
     );
+    setState(() {
+      getData();
+    });
   }
 
 
