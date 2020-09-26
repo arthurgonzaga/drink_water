@@ -90,22 +90,46 @@ class MyAppState extends State<MyApp> {
                                   future: getData(),
                                   builder: (context, snapshot) {
                                     if(snapshot.hasData){
+                                      goal = snapshot.data[3];
                                       //[drank, needToDrink, percentage, goal]
                                       return LiquidCircularProgressIndicator(
                                         value: snapshot.data[2], // Defaults to 0.5.
-                                        valueColor: AlwaysStoppedAnimation(Color.fromRGBO(102, 180, 255, 1)), // Defaults to the current Theme's accentColor.
+                                        valueColor: AlwaysStoppedAnimation(
+                                            Color.fromRGBO(102, 180, 255, 1)), // Defaults to the current Theme's accentColor.
                                         backgroundColor: Colors.transparent, // Defaults to the current Theme's backgroundColor.
-                                        borderColor: Color.fromRGBO(102, 180, 255, 1),
+                                        borderColor:
+                                        Color.fromRGBO(102, 180, 255, 1),
                                         borderWidth: 4.5,
                                         direction: Axis.vertical, // The direction the liquid moves (Axis.vertical = bottom to top, Axis.horizontal = left to right). Defaults to Axis.vertical.
-                                        center: Text(
-                                          "${snapshot.data[0]} L",
-                                          style: TextStyle(
-                                              color: (snapshot.data[2]) > 0.45 ? Colors.white : Color.fromRGBO(102, 180, 255, 1),
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 25
-                                          ),
-                                        ),
+                                        center: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              "${snapshot.data[0]} L",
+                                              style: TextStyle(
+                                                  color: (snapshot.data[2]) > 0.45
+                                                      ? Colors.white
+                                                      : Color.fromRGBO(102, 180, 255, 1),
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 25
+                                              ),
+                                            ),
+
+                                            (snapshot.data[0]) <= goal
+                                                ? Text(
+                                              "${num.parse(goal.toStringAsFixed(1))} L",
+                                              style: TextStyle(
+                                                  color: (snapshot.data[2]) > 0.45
+                                                      ? Color.fromRGBO(255, 255, 255, 0.7)
+                                                      : Color.fromRGBO(102, 180, 255, 0.7),
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 10
+                                              ),
+                                            )
+                                                : Container()
+
+                                          ],
+                                        )
                                       );
                                     }else{
                                       return Container(width: 0,height: 0,);
@@ -178,6 +202,7 @@ class MyAppState extends State<MyApp> {
 
                                   );
                                   setState(() {
+                                    getData();
                                     resetManually();
                                   });
                                 },
