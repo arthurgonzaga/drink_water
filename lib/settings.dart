@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -125,11 +124,12 @@ class SettingsState extends State<Settings>{
                                         style: TextStyle(color: Colors.blue),
                                         children: [
                                           TextSpan(text:"You need to drink "),
-                                          TextSpan(text:"${goal.toStringAsFixed(1)} Liters\n", style: TextStyle(
+                                          TextSpan(text:"${goal.toStringAsFixed(1)}", style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                             color: Colors.blue,
                                             fontSize: 21
                                           )),
+                                          TextSpan(text: " Liters of water\n"),
                                           TextSpan(text:"Your BMI is "),
                                           TextSpan(text:"${bmi.toStringAsFixed(1)}", style: TextStyle(
                                               fontWeight: FontWeight.bold,
@@ -223,7 +223,9 @@ class SettingsState extends State<Settings>{
 
     height = (prefs.getDouble('height') ?? 1.69);
     weight = (prefs.getDouble('weight') ?? 73);
-    bmi = (prefs.getDouble('bmi') ?? (weight/sqrt(height)));
+    double height2 = height*height;
+
+    bmi = (prefs.getDouble('bmi') ?? (weight/height2));
     goal = (prefs.getDouble('goal') ?? 2.0);
 
     print([height, weight, bmi, goal]);
