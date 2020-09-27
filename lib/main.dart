@@ -16,13 +16,19 @@ FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
 
 double drank, needToDrink, percentage, goal;
-int today;
-List<double> types = [0.1, 0.15, 0.2, 0.25, 0.3];
+int today, sleepTime;
+List<double> liters = [0.1, 0.15, 0.2, 0.25, 0.3];
+Duration timeDifference;
+PageController pageControllerWater = PageController(initialPage: 0);
+
+Future _getData;
 
 List daysDrank;
 
 
 void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  _getData = getData();
   runApp(MyApp());
 }
 
@@ -43,7 +49,7 @@ class MyAppState extends State<MyApp> {
     super.initState();
   }
 
-  PageController pageControllerWater = PageController(initialPage: 0);
+
   PageController pageController = PageController();
 
   @override
@@ -63,7 +69,9 @@ class MyAppState extends State<MyApp> {
                 children: [
                   PageView(
                     onPageChanged: (int index){
-                      //getAllDaysDrank();
+                      setState(() {
+                        resetManually();
+                      });
                     },
                     controller: pageController,
                     children: [
@@ -87,7 +95,7 @@ class MyAppState extends State<MyApp> {
                                 width: 200.0,
                                 height: 200.0,
                                 child: FutureBuilder(
-                                  future: getData(),
+                                  future: _getData,
                                   builder: (context, snapshot) {
                                     if(snapshot.hasData){
                                       goal = snapshot.data[3];
@@ -117,15 +125,15 @@ class MyAppState extends State<MyApp> {
 
                                             (snapshot.data[0]) <= goal
                                                 ? Text(
-                                              "${num.parse(goal.toStringAsFixed(1))} L",
+                                              "${num.parse(needToDrink.toStringAsFixed(1))} L",
                                               style: TextStyle(
-                                                  color: (snapshot.data[2]) > 0.45
-                                                      ? Color.fromRGBO(255, 255, 255, 0.7)
-                                                      : Color.fromRGBO(102, 180, 255, 0.7),
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 10
-                                              ),
-                                            )
+                                                        color: (snapshot.data[2]) > 0.45
+                                                            ? Color.fromRGBO(255, 255, 255, 0.7)
+                                                            : Color.fromRGBO(102, 180, 255, 0.7),
+                                                        fontWeight: FontWeight.bold,
+                                                        fontSize: 10
+                                                      ),
+                                                    )
                                                 : Container()
 
                                           ],
@@ -155,14 +163,25 @@ class MyAppState extends State<MyApp> {
                                             )
                                           ]
                                       ),
-                                      child: CardWater(pageControllerWater)
+                                      child: FutureBuilder(
+                                        future: _getData,
+                                        builder: (context, snapshot) {
+                                          if(snapshot.hasData){
+                                            return CardWater(pageControllerWater, needToDrink, timeDifference);
+                                          }else{
+                                            return Container();
+                                          }
+                                        },
+                                      )
                                   ),
                                   Container(
                                     margin: EdgeInsets.only(top: 20,bottom: 40),
                                     child: FloatingActionButton(
                                       onPressed: (){
-                                        addLiters(pageControllerWater.page.toInt());
-                                        setNotification(needToDrink);
+                                        setState(() {
+                                          addLiters(pageControllerWater.page.toInt());
+                                          setNotification(needToDrink, context);
+                                        });
                                       },
                                       child: Icon(
                                         Icons.send,
@@ -202,7 +221,7 @@ class MyAppState extends State<MyApp> {
 
                                   );
                                   setState(() {
-                                    getData();
+                                    _getData = getData();
                                     resetManually();
                                   });
                                 },
@@ -259,12 +278,12 @@ class MyAppState extends State<MyApp> {
       return;
     }
     setState(() {
-      drank += types[index];
+      drank += liters[index];
       percentage = drank/goal;
       needToDrink = goal - drank;
-      drank = num.parse(drank.toStringAsFixed(2));
+      drank = num.parse(drank.toStringAsFixed(1));
       percentage = num.parse(percentage.toStringAsFixed(2));
-      needToDrink = num.parse(needToDrink.toStringAsFixed(2));
+      needToDrink = num.parse(needToDrink.toStringAsFixed(1));
       updateData();
     });
   }
@@ -282,6 +301,17 @@ Future<List<double>> getData() async{
   goal = (prefs.getDouble('goal') ?? 2.0);
   needToDrink = (prefs.getDouble('needToDrink$today') ?? goal);
   percentage = (prefs.getDouble('percentage$today') ?? 0);
+  sleepTime = (prefs.getInt('sleepTime') ?? 23);
+
+  Duration now = Duration(
+      hours: DateTime.now().hour,
+      minutes: DateTime.now().minute
+  );
+
+  Duration sleep = Duration(hours: sleepTime, minutes: 0);
+  timeDifference = sleep - now;
+
+
   return [drank, needToDrink, percentage, goal];
 }
 
@@ -304,10 +334,11 @@ void updateData() async{
   prefs.setDouble("goal", goal ?? 2.0);
 }
 
-void resetData(SharedPreferences prefs){
+void resetData(SharedPreferences prefs) async{
   if(today == 6){
     prefs.setBool("update", true);
   }else if(today != 6 && prefs.getBool("update")==true){
+    await flutterLocalNotificationsPlugin.cancelAll();
     prefs.setBool("update", false);
     for(int i=0;i<=6; i++){
       prefs.setDouble("drank$i", 0);
@@ -319,6 +350,7 @@ void resetData(SharedPreferences prefs){
 
 void resetManually() async{
   SharedPreferences prefs = await SharedPreferences.getInstance();
+  await flutterLocalNotificationsPlugin.cancelAll();
   if(prefs.getBool("reset_manually")==true){
     prefs.setBool("reset_manually", false);
     for(int i=0;i<=6; i++){
@@ -327,6 +359,7 @@ void resetManually() async{
       prefs.setDouble("percentage$i", 0);
     }
   }
+  _getData = getData();
 }
 
 Future<void> initNotification() async {
@@ -345,7 +378,7 @@ Future notificationClick(String payload){
   //
 }
 
-Future<void> setNotification(double needToDrink) async {
+Future<void> setNotification(double needToDrink, BuildContext context) async {
 
   List titles = [
     "Drink water, Darling ❤",
@@ -359,7 +392,10 @@ Future<void> setNotification(double needToDrink) async {
     return null;
   }
 
-  var time = DateTime.now().add(Duration(seconds: 2));
+  var time = getTimeBasedOnUser(context);
+  if(time == null){
+    return null;
+  }
   var android = AndroidNotificationDetails(
       'DRINK_WATER_ID',
       titles[new Random().nextInt(titles.length)],
@@ -374,13 +410,42 @@ Future<void> setNotification(double needToDrink) async {
 
   );
   var ios = IOSNotificationDetails();
-  NotificationDetails plataform = NotificationDetails(android, ios);
+  NotificationDetails platform = NotificationDetails(android, ios);
   await flutterLocalNotificationsPlugin
       .schedule(
       0,
       titles[new Random().nextInt(titles.length)],
-      'You stil need to drink $needToDrink Liters', time, plataform);
+      'You still need to drink ${needToDrink.toStringAsFixed(1)} Liters', time, platform);
 }
+
+
+DateTime getTimeBasedOnUser(BuildContext context){
+  _getData = getData();
+
+  int minutesRemaining = timeDifference.inMinutes;
+
+  // liters = [0.1, 0.15, 0.2, 0.25, 0.3]
+  double pageSelected = pageControllerWater.page;
+
+  int sipAmount = (needToDrink/liters[pageSelected.toInt()]).round();
+  int timeOfNextNotification = (minutesRemaining/sipAmount).round();
+
+  Duration duration = Duration(minutes: (timeOfNextNotification - 1));
+
+  DateTime dateTime = DateTime.now().add(duration);
+
+  if(dateTime.compareTo(DateTime.now()) < 0){
+    print("too late");
+    return null;
+  }
+
+  Scaffold.of(context).showSnackBar(
+    SnackBar(content: Text("Next notification: ${dateTime.hour}:${dateTime.minute}"))
+  );
+  return dateTime;
+}
+
+
 
 int getDayByName(){
   DateTime now = DateTime.now();
