@@ -274,7 +274,7 @@ class SettingsState extends State<Settings>{
                             },
                             child: Text(
                               "HELP",
-                              style: TextStyle(color: Colors.blueAccent),
+                              style: TextStyle(color: Color.fromRGBO(0,0, 0, 0.3)),
                             ),
                             splashColor: Color.fromRGBO(255, 255, 255, 0.5),
                             highlightColor: Color.fromRGBO(255, 255, 255, 0.4),
