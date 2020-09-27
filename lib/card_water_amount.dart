@@ -5,10 +5,11 @@ import 'package:flutter/material.dart';
 class CardWater extends StatefulWidget{
   final PageController controller;
   double needToDrink;
+  Future _getData;
   Duration timeDifference;
   List<double> liters = [0.1, 0.15, 0.2, 0.25, 0.3];
 
-  CardWater(this.controller, this.needToDrink, this.timeDifference);
+  CardWater(this.controller, this.needToDrink, this.timeDifference, this._getData);
 
   CardWaterState createState() => CardWaterState();
 }
@@ -17,11 +18,6 @@ class CardWaterState extends State<CardWater>{
 
 
   int sipsToDrink;
-  @override
-  void initState() {
-    sipsToDrink = (widget.needToDrink/widget.liters[0]).round();
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,11 +25,6 @@ class CardWaterState extends State<CardWater>{
       backgroundColor: Colors.transparent,
       body: PageView(
         controller: widget.controller,
-        onPageChanged: (index){
-          sipsToDrink = (widget.needToDrink/widget.liters[index]).round();
-          setState(() {
-          });
-        },
         children: [
           Center(
               child: Column(
@@ -44,20 +35,25 @@ class CardWaterState extends State<CardWater>{
                     width: 45,
                     height: 45,
                   ),
-                  RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: "100 ml",
-                            style: TextStyle(
-                                color: Color.fromRGBO(102, 180, 255, 1),
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold
-                            ),
-                          ),
-                          sipsToDrink != null
-                              ? TextSpan(
+                  FutureBuilder(
+                      future: widget._getData,
+                      builder: (context, snapshot) {
+                        if(snapshot.hasData){
+                          sipsToDrink = (snapshot.data[1]/widget.liters[0]).round();
+                          return RichText(
+                            textAlign: TextAlign.center,
+                            text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: "150 ml",
+                                    style: TextStyle(
+                                        color: Color.fromRGBO(102, 180, 255, 1),
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold
+                                    ),
+                                  ),
+                                  sipsToDrink != null
+                                      ? TextSpan(
                                     text: "\n${sipsToDrink}x",
                                     style: TextStyle(
                                       color: Color.fromRGBO(0, 0, 0, 0.2),
@@ -65,9 +61,14 @@ class CardWaterState extends State<CardWater>{
                                       fontWeight: FontWeight.bold,
                                     ),
                                   )
-                              : TextSpan(),
-                        ]
-                    ),
+                                      : TextSpan(),
+                                ]
+                            ),
+                          );
+                        }else{
+                          return Container();
+                        }
+                      }
                   )
                 ],
               )
@@ -81,30 +82,41 @@ class CardWaterState extends State<CardWater>{
                     width: 45,
                     height: 45,
                   ),
-                  RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: "150 ml",
-                            style: TextStyle(
-                                color: Color.fromRGBO(102, 180, 255, 1),
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold
-                            ),
-                          ),
-                          sipsToDrink != null
-                              ? TextSpan(
-                                  text: "\n${sipsToDrink}x",
-                                  style: TextStyle(
-                                    color: Color.fromRGBO(0, 0, 0, 0.2),
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
+
+                  FutureBuilder(
+                  future: widget._getData,
+                      builder: (context, snapshot) {
+                      if(snapshot.hasData){
+                        sipsToDrink = (snapshot.data[1]/widget.liters[1]).round();
+                        return RichText(
+                            textAlign: TextAlign.center,
+                            text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: "150 ml",
+                                    style: TextStyle(
+                                        color: Color.fromRGBO(102, 180, 255, 1),
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold
+                                    ),
                                   ),
-                                )
-                              : TextSpan(),
-                        ]
-                    ),
+                                  sipsToDrink != null
+                                      ? TextSpan(
+                                            text: "\n${sipsToDrink}x",
+                                            style: TextStyle(
+                                              color: Color.fromRGBO(0, 0, 0, 0.2),
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          )
+                                      : TextSpan(),
+                                        ]
+                                    ),
+                            );
+                          }else{
+                            return Container();
+                          }
+                      }
                   )
                 ],
               )
@@ -118,20 +130,25 @@ class CardWaterState extends State<CardWater>{
                     width: 45,
                     height: 45,
                   ),
-                  RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: "200 ml",
-                            style: TextStyle(
-                                color: Color.fromRGBO(102, 180, 255, 1),
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold
-                            ),
-                          ),
-                          sipsToDrink != null
-                              ? TextSpan(
+                  FutureBuilder(
+                      future: widget._getData,
+                      builder: (context, snapshot) {
+                        if(snapshot.hasData){
+                          sipsToDrink = (snapshot.data[1]/widget.liters[2]).round();
+                          return RichText(
+                            textAlign: TextAlign.center,
+                            text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: "150 ml",
+                                    style: TextStyle(
+                                        color: Color.fromRGBO(102, 180, 255, 1),
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold
+                                    ),
+                                  ),
+                                  sipsToDrink != null
+                                      ? TextSpan(
                                     text: "\n${sipsToDrink}x",
                                     style: TextStyle(
                                       color: Color.fromRGBO(0, 0, 0, 0.2),
@@ -139,9 +156,14 @@ class CardWaterState extends State<CardWater>{
                                       fontWeight: FontWeight.bold,
                                     ),
                                   )
-                              : TextSpan(),
-                        ]
-                    ),
+                                      : TextSpan(),
+                                ]
+                            ),
+                          );
+                        }else{
+                          return Container();
+                        }
+                      }
                   )
                 ],
               )
@@ -156,30 +178,40 @@ class CardWaterState extends State<CardWater>{
                     width: 50,
                     height: 50,
                   ),
-                  RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(
-                      children: [
-                        TextSpan(
-                          text: "250 ml",
-                          style: TextStyle(
-                              color: Color.fromRGBO(102, 180, 255, 1),
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold
-                          ),
-                        ),
-                        sipsToDrink != null
-                            ? TextSpan(
-                                  text: "\n${sipsToDrink}x",
-                                  style: TextStyle(
-                                    color: Color.fromRGBO(0, 0, 0, 0.2),
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
+                  FutureBuilder(
+                      future: widget._getData,
+                      builder: (context, snapshot) {
+                        if(snapshot.hasData){
+                          sipsToDrink = (snapshot.data[1]/widget.liters[3]).round();
+                          return RichText(
+                            textAlign: TextAlign.center,
+                            text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: "150 ml",
+                                    style: TextStyle(
+                                        color: Color.fromRGBO(102, 180, 255, 1),
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold
+                                    ),
                                   ),
-                                )
-                            : TextSpan(),
-                      ]
-                    ),
+                                  sipsToDrink != null
+                                      ? TextSpan(
+                                    text: "\n${sipsToDrink}x",
+                                    style: TextStyle(
+                                      color: Color.fromRGBO(0, 0, 0, 0.2),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  )
+                                      : TextSpan(),
+                                ]
+                            ),
+                          );
+                        }else{
+                          return Container();
+                        }
+                      }
                   )
                 ],
               )
@@ -193,20 +225,25 @@ class CardWaterState extends State<CardWater>{
                     width: 50,
                     height: 50,
                   ),
-                  RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: "300 ml",
-                            style: TextStyle(
-                                color: Color.fromRGBO(102, 180, 255, 1),
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold
-                            ),
-                          ),
-                          sipsToDrink != null
-                              ? TextSpan(
+                  FutureBuilder(
+                      future: widget._getData,
+                      builder: (context, snapshot) {
+                        if(snapshot.hasData){
+                          sipsToDrink = (snapshot.data[1]/widget.liters[4]).round();
+                          return RichText(
+                            textAlign: TextAlign.center,
+                            text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: "150 ml",
+                                    style: TextStyle(
+                                        color: Color.fromRGBO(102, 180, 255, 1),
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold
+                                    ),
+                                  ),
+                                  sipsToDrink != null
+                                      ? TextSpan(
                                     text: "\n${sipsToDrink}x",
                                     style: TextStyle(
                                       color: Color.fromRGBO(0, 0, 0, 0.2),
@@ -214,9 +251,14 @@ class CardWaterState extends State<CardWater>{
                                       fontWeight: FontWeight.bold,
                                     ),
                                   )
-                              : TextSpan(),
-                        ]
-                    ),
+                                      : TextSpan(),
+                                ]
+                            ),
+                          );
+                        }else{
+                          return Container();
+                        }
+                      }
                   )
                 ],
               ),

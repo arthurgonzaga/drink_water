@@ -11,6 +11,9 @@ String name;
 
 
 class Settings extends StatefulWidget{
+  Future _getData;
+
+  Settings(this._getData);
 
   SettingsState createState() => SettingsState();
 }
@@ -25,6 +28,7 @@ class SettingsState extends State<Settings>{
 
   @override
   void initState() {
+    widget._getData = getData();
     super.initState();
   }
 
@@ -72,7 +76,7 @@ class SettingsState extends State<Settings>{
                                   color: Color.fromRGBO(26, 143, 255, 1)
                               ),
                             onPressed: () async{
-                                  resetData();
+                                  resetData(widget._getData);
                                   },
                             tooltip: "RESET DATA",
                           ),
@@ -81,7 +85,7 @@ class SettingsState extends State<Settings>{
                       ),
                     ),
                     FutureBuilder(
-                      future: getData(),
+                      future: widget._getData,
 
                         // Snapshot is list like: [height, weight, bmi, goal];
                         builder: (context, snapshot) {
@@ -168,7 +172,7 @@ class SettingsState extends State<Settings>{
                                     margin: EdgeInsets.only(top: 20),
                                     child: RaisedButton(
                                       onPressed: (){
-                                        saveData(context);
+                                        saveData(context, widget._getData);
                                       },
                                       color: Colors.blue,
                                       child: Text("Save",style: TextStyle(color: Colors.white),),
@@ -304,11 +308,11 @@ class SettingsState extends State<Settings>{
     sleepMinutes = (prefs.getInt('sleepMinutes') ?? 00);
     name = prefs.getString('name') ?? "Adrielly";
 
-    print([height, weight, bmi, goal, name]);
+    //print([height, weight, bmi, goal, name]);
     return [height, weight, bmi, goal, name];
   }
 
-  Future<void> saveData(BuildContext context) async{
+  Future<void> saveData(BuildContext context, Future _getData) async{
 
     // The body needs 35ml for every 1kg of the body
     goal = 0.035 * double.parse(double.parse(controllerWeight.text).toStringAsFixed(1));
@@ -331,7 +335,7 @@ class SettingsState extends State<Settings>{
       SnackBar(content: Text("Saved Successfully"))
     );
     setState(() {
-      getData();
+      _getData = getData();
     });
   }
 
@@ -367,9 +371,14 @@ class SettingsState extends State<Settings>{
     }
   }
 
-  Future<void> resetData() async {
+  Future<void> resetData(Future _getData) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setBool("reset_manually", true);
+    for(int i=0;i<=6; i++){
+      prefs.setDouble("drank$i", 0);
+      prefs.setDouble("needToDrink$i", goal);
+      prefs.setDouble("percentage$i", 0);
+    }
+    _getData = getData();
   }
 
 }

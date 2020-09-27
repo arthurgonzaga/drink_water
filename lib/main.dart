@@ -100,7 +100,7 @@ class MyAppState extends State<MyApp> with TickerProviderStateMixin {
                           PageView(
                             onPageChanged: (int index){
                               setState(() {
-                                resetManually();
+                                _getData = getData();
                               });
                             },
                             controller: pageController,
@@ -183,7 +183,7 @@ class MyAppState extends State<MyApp> with TickerProviderStateMixin {
                                                     )
                                                   ]
                                               ),
-                                              child: CardWater(pageControllerWater, snapshot.data[1], timeDifference)
+                                              child: CardWater(pageControllerWater, snapshot.data[1], timeDifference, _getData)
                                           ),
                                           Container(
                                             margin: EdgeInsets.only(top: 20,bottom: 40),
@@ -243,13 +243,12 @@ class MyAppState extends State<MyApp> with TickerProviderStateMixin {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (context) => Settings(),
+                                            builder: (context) => Settings(_getData),
                                           ),
 
                                         );
                                         setState(() {
                                           _getData = getData();
-                                          resetManually();
                                         });
                                       },
                                       label: Text("Settings")
@@ -301,12 +300,9 @@ class MyAppState extends State<MyApp> with TickerProviderStateMixin {
 
   }
 
-  void addLiters(int index){
+  void addLiters(int index) async{
 
     if(drank >= goal){
-      setState(() {
-
-      });
       return;
     }
     setState(() {
@@ -371,6 +367,7 @@ void updateData() async{
   prefs.setDouble("needToDrink$today", needToDrink);
   prefs.setDouble("percentage$today", percentage);
   prefs.setDouble("goal", goal ?? 2.0);
+  _getData = getData();
 }
 
 void resetData(SharedPreferences prefs) async{
@@ -387,19 +384,6 @@ void resetData(SharedPreferences prefs) async{
   }
 }
 
-void resetManually() async{
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  await flutterLocalNotificationsPlugin.cancelAll();
-  if(prefs.getBool("reset_manually")==true){
-    prefs.setBool("reset_manually", false);
-    for(int i=0;i<=6; i++){
-      prefs.setDouble("drank$i", 0);
-      prefs.setDouble("needToDrink$i", goal);
-      prefs.setDouble("percentage$i", 0);
-    }
-  }
-  _getData = getData();
-}
 
 Future<void> initNotification() async {
   flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
