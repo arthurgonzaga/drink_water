@@ -353,8 +353,13 @@ Future<List<dynamic>> getAllDaysDrank() async{
   List data = [];
   SharedPreferences prefs = await SharedPreferences.getInstance();
   goal = prefs.getDouble("goal");
-  for(int i=0;i<=6;i++){
-    data.add(prefs.getDouble("drank$i"));
+  for(int day=0;day<=6;day++){
+    var drank = prefs.getDouble("drank$day");
+    if(drank == null){
+      drank = 0;
+      prefs.setDouble("drank$day", drank);
+    }
+    data.add(drank);
     //print(data);
   }
   return data;
@@ -413,6 +418,7 @@ Future notificationClick(String payload){
 }
 
 Future<void> setNotification(double needToDrink, BuildContext context) async {
+  await flutterLocalNotificationsPlugin.cancelAll();
 
   List titles = [
     "Drink water, Darling ❤",
