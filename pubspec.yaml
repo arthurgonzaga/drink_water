@@ -30,6 +30,7 @@ dependencies:
   intl: ^0.16.1
   shared_preferences: ^0.5.12
   fl_chart: ^0.11.1
+  lottie: ^0.6.0
 
 
   # The following adds the Cupertino Icons font to your application.
