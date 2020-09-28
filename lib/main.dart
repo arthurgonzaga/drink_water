@@ -23,13 +23,14 @@ List<double> liters = [0.1, 0.15, 0.2, 0.25, 0.3];
 Duration timeDifference;
 PageController pageControllerWater = PageController(initialPage: 0);
 
-Future _getData;
+Future _getData, _initNotification;
 
 List daysDrank;
 
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
+  _initNotification = initNotification();
   _getData = getData();
   runApp(MyApp());
 }
@@ -50,17 +51,9 @@ class MyAppState extends State<MyApp> with TickerProviderStateMixin {
 
   @override
   void initState() {
-    initNotification();
     _controller = AnimationController(vsync: this, duration: Duration(seconds: 4));
     super.initState();
 
-
-    _controller.addListener(()=>setState((){}));
-    TickerFuture ticker = _controller.repeat();
-    ticker.timeout(Duration(seconds: 8),onTimeout: (){
-      _controller.forward(from: 0);
-      _controller.stop(canceled: true);
-    });
   }
 
 
@@ -77,223 +70,249 @@ class MyAppState extends State<MyApp> with TickerProviderStateMixin {
           backgroundColor: Color.fromRGBO(212, 237,255 , 1),
           body: Builder(
 
-            builder: (context) => FutureBuilder(
-              future: _getData,
-                builder: (context, snapshot) {
-                  // snapshot.data = [drank, needToDrink, percentage, goal, name]
-                  if(snapshot.hasData){
-                    drank = snapshot.data[0];
-                    needToDrink = snapshot.data[1];
-                    percentage = snapshot.data[2];
-                    goal = snapshot.data[3];
-                    name = snapshot.data[4];
+            builder: (context){
+                return FutureBuilder(
 
-                    return Stack(
-                        children: [
-                          snapshot.data[0] >= snapshot.data[3]
-                              ? LottieBuilder.network(
-                            "https://assets4.lottiefiles.com/packages/lf20_WdkR06.json",
-                            controller: _controller,
-                            frameRate: FrameRate(60),
-                          )
-                              : Container(),
-                          PageView(
-                            onPageChanged: (int index){
-                              setState(() {
-                                _getData = getData();
+                  // Todo: fix the initNotification Bug
+                  future: _initNotification,
+                  builder: (context, snapshot) {
+
+                    if(snapshot.hasData){
+                      if(snapshot.data){
+                        _getData = getData();
+                      }
+                      return FutureBuilder(
+                        future: _getData,
+                        builder: (context, snapshot) {
+                          // snapshot.data = [drank, needToDrink, percentage, goal, name]
+                          if(snapshot.hasData){
+                            drank = snapshot.data[0];
+                            needToDrink = snapshot.data[1];
+                            percentage = snapshot.data[2];
+                            goal = snapshot.data[3];
+                            name = snapshot.data[4];
+
+                            if(snapshot.data[0] >= snapshot.data[3]){
+                              _controller.addListener(()=>setState((){}));
+                              TickerFuture ticker = _controller.repeat();
+                              ticker.timeout(Duration(seconds: 8),onTimeout: (){
+                                _controller.forward(from: 0);
+                                _controller.stop(canceled: true);
                               });
-                            },
-                            controller: pageController,
-                            children: [
-                              Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 32),
-                                      child: Text(
-                                        "${snapshot.data[4]}",
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                            color: Color.fromRGBO(26, 143, 255, 1),
-                                            fontSize: 40.0,
-                                            fontWeight: FontWeight.w900
+                            }
+
+                            return Stack(
+                                children: [
+                                  snapshot.data[0] >= snapshot.data[3]
+                                      ? LottieBuilder.network(
+                                    "https://assets4.lottiefiles.com/packages/lf20_WdkR06.json",
+                                    controller: _controller,
+                                    frameRate: FrameRate(60),
+                                  )
+                                      : Container(),
+                                  PageView(
+                                    onPageChanged: (int index){
+                                      setState(() {
+                                        resetManually();
+                                      });
+                                    },
+                                    controller: pageController,
+                                    children: [
+                                      Center(
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.only(top: 32),
+                                              child: Text(
+                                                "${snapshot.data[4]}",
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                    color: Color.fromRGBO(26, 143, 255, 1),
+                                                    fontSize: 40.0,
+                                                    fontWeight: FontWeight.w900
+                                                ),
+                                              ),
+                                            ),
+                                            Container(
+                                                width: 200.0,
+                                                height: 200.0,
+                                                child: LiquidCircularProgressIndicator(
+                                                    value: snapshot.data[2], // Defaults to 0.5.
+                                                    valueColor: AlwaysStoppedAnimation(
+                                                        Color.fromRGBO(102, 180, 255, 1)), // Defaults to the current Theme's accentColor.
+                                                    backgroundColor: Colors.transparent, // Defaults to the current Theme's backgroundColor.
+                                                    borderColor:
+                                                    Color.fromRGBO(102, 180, 255, 1),
+                                                    borderWidth: 4.5,
+                                                    direction: Axis.vertical, // The direction the liquid moves (Axis.vertical = bottom to top, Axis.horizontal = left to right). Defaults to Axis.vertical.
+                                                    center: Column(
+                                                      mainAxisAlignment: MainAxisAlignment.center,
+                                                      children: [
+                                                        Text(
+                                                          "${snapshot.data[0]} L",
+                                                          style: TextStyle(
+                                                              color: (snapshot.data[2]) > 0.45
+                                                                  ? Colors.white
+                                                                  : Color.fromRGBO(102, 180, 255, 1),
+                                                              fontWeight: FontWeight.bold,
+                                                              fontSize: 25
+                                                          ),
+                                                        ),
+
+                                                        (snapshot.data[0]) <= snapshot.data[3]
+                                                            ? Text(
+                                                          "${num.parse(needToDrink.toStringAsFixed(1))} L",
+                                                          style: TextStyle(
+                                                              color: (snapshot.data[2]) > 0.45
+                                                                  ? Color.fromRGBO(255, 255, 255, 0.7)
+                                                                  : Color.fromRGBO(102, 180, 255, 0.7),
+                                                              fontWeight: FontWeight.bold,
+                                                              fontSize: 10
+                                                          ),
+                                                        )
+                                                            : Container()
+
+                                                      ],
+                                                    )
+                                                )
+                                            ),
+                                            // Parte de baixo
+                                            (snapshot.data[0] < snapshot.data[3])
+                                                ? Column(
+                                                children: [
+                                                  // White Card
+                                                  Container(
+                                                      width: 120,
+                                                      height: 120,
+                                                      decoration: BoxDecoration(
+                                                          color: Colors.white,
+                                                          borderRadius: BorderRadius.circular(8),
+                                                          boxShadow: [
+                                                            BoxShadow(
+                                                              color: Color.fromRGBO(0, 0, 0, 0.1),
+                                                              offset: Offset(0,5),
+                                                              blurRadius: 5,
+                                                            )
+                                                          ]
+                                                      ),
+                                                      child: CardWater(pageControllerWater, snapshot.data[1], timeDifference, _getData)
+                                                  ),
+                                                  Container(
+                                                    margin: EdgeInsets.only(top: 20,bottom: 40),
+                                                    child: FloatingActionButton(
+                                                      onPressed: (){
+                                                        setState(() {
+                                                          addLiters(pageControllerWater.page.toInt());
+                                                          setNotification(needToDrink, context);
+                                                        });
+                                                      },
+                                                      child: Icon(
+                                                        Icons.send,
+                                                        size: 20,
+                                                      ),
+                                                      tooltip: "DRINK WATER",
+                                                    ),
+                                                  )
+                                                ]
+                                            )
+                                                : Container(
+                                                margin: EdgeInsets.only(
+                                                    top: 0,
+                                                    bottom: 64
+                                                ),
+                                                child: Text(
+                                                  "Congratulations!!!\nYou're finished for today\n🥰🎉",
+                                                  style: TextStyle(
+                                                    color: Colors.blue,
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                )
+                                            )
+                                          ],
                                         ),
                                       ),
-                                    ),
-                                    Container(
-                                        width: 200.0,
-                                        height: 200.0,
-                                        child: LiquidCircularProgressIndicator(
-                                            value: snapshot.data[2], // Defaults to 0.5.
-                                            valueColor: AlwaysStoppedAnimation(
-                                                Color.fromRGBO(102, 180, 255, 1)), // Defaults to the current Theme's accentColor.
-                                            backgroundColor: Colors.transparent, // Defaults to the current Theme's backgroundColor.
-                                            borderColor:
-                                            Color.fromRGBO(102, 180, 255, 1),
-                                            borderWidth: 4.5,
-                                            direction: Axis.vertical, // The direction the liquid moves (Axis.vertical = bottom to top, Axis.horizontal = left to right). Defaults to Axis.vertical.
-                                            center: Column(
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              children: [
-                                                Text(
-                                                  "${snapshot.data[0]} L",
-                                                  style: TextStyle(
-                                                      color: (snapshot.data[2]) > 0.45
-                                                          ? Colors.white
-                                                          : Color.fromRGBO(102, 180, 255, 1),
-                                                      fontWeight: FontWeight.bold,
-                                                      fontSize: 25
-                                                  ),
-                                                ),
-
-                                                (snapshot.data[0]) <= snapshot.data[3]
-                                                    ? Text(
-                                                  "${num.parse(needToDrink.toStringAsFixed(1))} L",
-                                                  style: TextStyle(
-                                                      color: (snapshot.data[2]) > 0.45
-                                                          ? Color.fromRGBO(255, 255, 255, 0.7)
-                                                          : Color.fromRGBO(102, 180, 255, 0.7),
-                                                      fontWeight: FontWeight.bold,
-                                                      fontSize: 10
-                                                  ),
-                                                )
-                                                    : Container()
-
-                                              ],
-                                            )
-                                        )
-                                    ),
-                                    // Parte de baixo
-                                    (snapshot.data[0] < snapshot.data[3])
-                                        ? Column(
+                                      Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
                                         children: [
-                                          // White Card
-                                          Container(
-                                              width: 120,
-                                              height: 120,
-                                              decoration: BoxDecoration(
-                                                  color: Colors.white,
-                                                  borderRadius: BorderRadius.circular(8),
-                                                  boxShadow: [
-                                                    BoxShadow(
-                                                      color: Color.fromRGBO(0, 0, 0, 0.1),
-                                                      offset: Offset(0,5),
-                                                      blurRadius: 5,
-                                                    )
-                                                  ]
-                                              ),
-                                              child: CardWater(pageControllerWater, snapshot.data[1], timeDifference, _getData)
+                                          Padding(
+                                              padding: const EdgeInsets.all(32.0),
+                                              child: FutureBuilder(
+                                                future: getAllDaysDrank(),
+                                                builder: (context, snapshot) {
+                                                  if(snapshot.hasData){
+                                                    return Chart(snapshot.data, goal);
+                                                  }else{
+                                                    return Container();
+                                                  }
+                                                },
+                                              )
                                           ),
-                                          Container(
-                                            margin: EdgeInsets.only(top: 20,bottom: 40),
-                                            child: FloatingActionButton(
-                                              onPressed: (){
+                                          FloatingActionButton.extended(
+                                              icon: Icon(Icons.settings),
+                                              onPressed: () async {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) => Settings(),
+                                                  ),
+
+                                                );
                                                 setState(() {
-                                                  addLiters(pageControllerWater.page.toInt());
-                                                  setNotification(needToDrink, context);
+                                                  _getData = getData();
                                                 });
                                               },
-                                              child: Icon(
-                                                Icons.send,
-                                                size: 20,
-                                              ),
-                                              tooltip: "DRINK WATER",
-                                            ),
+                                              label: Text("Settings")
                                           )
-                                        ]
-                                    )
-                                    : Container(
-                                        margin: EdgeInsets.only(
-                                            top: 0,
-                                            bottom: 64
-                                        ),
-                                        child: Text(
-                                          "Congratulations!!!\nYou're finished for today\n🥰🎉",
-                                          style: TextStyle(
-                                            color: Colors.blue,
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                          textAlign: TextAlign.center,
-                                        )
-                                    )
-                                  ],
-                                ),
-                              ),
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Padding(
-                                      padding: const EdgeInsets.all(32.0),
-                                      child: FutureBuilder(
-                                        future: getAllDaysDrank(),
-                                        builder: (context, snapshot) {
-                                          if(snapshot.hasData){
-                                            return Chart(snapshot.data, goal);
-                                          }else{
-                                            return Container();
-                                          }
-                                        },
+                                        ],
                                       )
+                                    ],
                                   ),
-                                  FloatingActionButton.extended(
-                                      icon: Icon(Icons.settings),
-                                      onPressed: () async {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => Settings(_getData),
+                                  Center(
+                                    child: Container(
+                                      margin: EdgeInsets.only(bottom: 32),
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        children: [
+                                          SmoothPageIndicator(
+                                              controller: pageController,  // PageController
+                                              count:  2,
+                                              axisDirection: Axis.horizontal,
+                                              effect:  SwapEffect(
+                                                dotHeight: 10,
+                                                spacing: 8,
+                                                dotWidth: 10,
+                                                activeDotColor: Color.fromRGBO(102, 180, 255, 1),
+                                                dotColor: Color.fromRGBO(102, 180, 255, 0.3),
+
+                                              ),  // your preferred effect
+                                              onDotClicked: (index){
+                                                pageController.animateToPage(
+                                                    index,
+                                                    duration: new Duration(seconds: 1),
+                                                    curve: Curves.linearToEaseOut
+                                                );
+                                              }
                                           ),
-
-                                        );
-                                        setState(() {
-                                          _getData = getData();
-                                        });
-                                      },
-                                      label: Text("Settings")
-                                  )
-                                ],
-                              )
-                            ],
-                          ),
-                          Center(
-                            child: Container(
-                              margin: EdgeInsets.only(bottom: 32),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  SmoothPageIndicator(
-                                      controller: pageController,  // PageController
-                                      count:  2,
-                                      axisDirection: Axis.horizontal,
-                                      effect:  SwapEffect(
-                                        dotHeight: 10,
-                                        spacing: 8,
-                                        dotWidth: 10,
-                                        activeDotColor: Color.fromRGBO(102, 180, 255, 1),
-                                        dotColor: Color.fromRGBO(102, 180, 255, 0.3),
-
-                                      ),  // your preferred effect
-                                      onDotClicked: (index){
-                                        pageController.animateToPage(
-                                            index,
-                                            duration: new Duration(seconds: 1),
-                                            curve: Curves.linearToEaseOut
-                                        );
-                                      }
+                                        ],
+                                      ),
+                                    ),
                                   ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ]
-                    );
-                  }else{
-                    return Container();
-                  }
-                },
-            )
+                                ]
+                            );
+                          }else{
+                            return Container();
+                          }
+                        },
+                      );
+                    }else{
+                      return CircularProgressIndicator();
+                    }
+                  },
+                );
+              }
             ),
           )
     );
@@ -384,8 +403,21 @@ void resetData(SharedPreferences prefs) async{
   }
 }
 
+void resetManually() async{
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await flutterLocalNotificationsPlugin.cancelAll();
+  if(prefs.getBool("reset_manually")==true){
+    prefs.setBool("reset_manually", false);
+    for(int i=0;i<=6; i++){
+      prefs.setDouble("drank$i", 0);
+      prefs.setDouble("needToDrink$i", goal);
+      prefs.setDouble("percentage$i", 0);
+    }
+  }
+  _getData = getData();
+}
 
-Future<void> initNotification() async {
+Future<bool> initNotification() async {
   flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
   // initialise the plugin. app_icon needs to be a added as a drawable resource to the Android head project
   var initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -393,7 +425,7 @@ Future<void> initNotification() async {
       onDidReceiveLocalNotification: null);
   var initializationSettings = InitializationSettings(
       initializationSettingsAndroid, initializationSettingsIOS);
-  await flutterLocalNotificationsPlugin.initialize(initializationSettings,
+  return await flutterLocalNotificationsPlugin.initialize(initializationSettings,
       onSelectNotification: notificationClick);
 }
 
@@ -463,9 +495,25 @@ DateTime getTimeBasedOnUser(BuildContext context){
     return null;
   }
 
+  String notificationText;
+
+  if(duration.inHours <= 0){
+    notificationText = "Next notification in ${duration.inMinutes} minutes";
+  }else if((duration.inMinutes - (60*duration.inHours)) == 0){
+    if(duration.inHours == 1){
+      notificationText = "Next notification in 1 hour";
+    }else{
+      notificationText = "Next notification in ${duration.inHours} hours";
+    }
+  }else{
+    notificationText = "Next notification in ${duration.inHours} "
+        "hours and ${(duration.inMinutes - (60*duration.inHours))} minutes";
+  }
+
+
   Scaffold.of(context).showSnackBar(
-    SnackBar(content: Text("Next notification: ${dateTime.hour}:${dateTime.minute}"))
-  );
+    SnackBar(content: Text(notificationText)
+  ));
   return dateTime;
 }
 

@@ -11,16 +11,13 @@ String name;
 
 
 class Settings extends StatefulWidget{
-  Future _getData;
-
-  Settings(this._getData);
 
   SettingsState createState() => SettingsState();
 }
 
 
 class SettingsState extends State<Settings>{
-  
+
   final controllerHeight = TextEditingController();
   final controllerWeight = TextEditingController();
   final controllerName = TextEditingController();
@@ -28,38 +25,37 @@ class SettingsState extends State<Settings>{
 
   @override
   void initState() {
-    widget._getData = getData();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        debugShowCheckedModeBanner: false,
+      debugShowCheckedModeBanner: false,
 
-        home: Scaffold(
-          resizeToAvoidBottomPadding: false,
-            backgroundColor: Color.fromRGBO(212, 237,255 , 1),
-            body: SafeArea(
-              child: Stack(
-                children: [
-                  Column(
+      home: Scaffold(
+        resizeToAvoidBottomPadding: false,
+        backgroundColor: Color.fromRGBO(212, 237,255 , 1),
+        body: SafeArea(
+          child: Stack(
+              children: [
+                Column(
                   children: [
                     Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16,
-                        vertical: 32
+                          vertical: 32
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           IconButton(
                             icon: Icon(Icons.arrow_back_rounded,
-                              size: 32,
-                              color: Color.fromRGBO(26, 143, 255, 1)),
+                                size: 32,
+                                color: Color.fromRGBO(26, 143, 255, 1)),
                             onPressed: (){
-                                  Navigator.of(context).pop(true);
-                                  },
+                              Navigator.of(context).pop(true);
+                            },
                             tooltip: "BACK",
                           ),
                           Text(
@@ -71,13 +67,13 @@ class SettingsState extends State<Settings>{
                             ),
                           ),
                           IconButton(
-                              icon: Icon(Icons.refresh,
-                                  size: 32,
-                                  color: Color.fromRGBO(26, 143, 255, 1)
-                              ),
+                            icon: Icon(Icons.refresh,
+                                size: 32,
+                                color: Color.fromRGBO(26, 143, 255, 1)
+                            ),
                             onPressed: () async{
-                                  resetData(widget._getData);
-                                  },
+                              resetData();
+                            },
                             tooltip: "RESET DATA",
                           ),
                         ],
@@ -85,7 +81,7 @@ class SettingsState extends State<Settings>{
                       ),
                     ),
                     FutureBuilder(
-                      future: widget._getData,
+                        future: getData(),
 
                         // Snapshot is list like: [height, weight, bmi, goal];
                         builder: (context, snapshot) {
@@ -117,7 +113,7 @@ class SettingsState extends State<Settings>{
                                       controller: controllerHeight,
                                       keyboardType: TextInputType.number,
                                       decoration: InputDecoration(
-                                          labelText: 'Type your Height',
+                                        labelText: 'Type your Height',
                                       ),
                                     ),
                                   ),
@@ -133,16 +129,16 @@ class SettingsState extends State<Settings>{
                                   ),
 
                                   Container(
-                                    padding: EdgeInsets.all(16),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                                      children: [
-                                        OutlineButton(
+                                      padding: EdgeInsets.all(16),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                                        children: [
+                                          OutlineButton(
                                             onPressed: () async{
                                               TimeOfDay time = TimeOfDay(hour: sleepHours, minute: sleepMinutes);
                                               TimeOfDay picked = await showTimePicker(
-                                                  context: context,
-                                                  initialTime: time,
+                                                context: context,
+                                                initialTime: time,
                                                 builder: (BuildContext context, Widget child) {
                                                   return MediaQuery(
                                                     data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
@@ -159,20 +155,20 @@ class SettingsState extends State<Settings>{
                                               prefs.setInt("sleepHours", sleepHours);
                                               prefs.setInt("sleepMinutes", sleepMinutes);
                                             },
-                                          color: Colors.blue,
-                                          child: Text("SLEEP TIME", style: TextStyle(color: Colors.blue),),
-                                          splashColor: Color.fromRGBO(255, 255, 255, 0.4),
-                                          highlightColor: Colors.transparent,
-                                        )
-                                      ],
-                                    )
+                                            color: Colors.blue,
+                                            child: Text("SLEEP TIME", style: TextStyle(color: Colors.blue),),
+                                            splashColor: Color.fromRGBO(255, 255, 255, 0.4),
+                                            highlightColor: Colors.transparent,
+                                          )
+                                        ],
+                                      )
                                   ),
 
                                   Container(
                                     margin: EdgeInsets.only(top: 20),
                                     child: RaisedButton(
                                       onPressed: (){
-                                        saveData(context, widget._getData);
+                                        saveData(context);
                                       },
                                       color: Colors.blue,
                                       child: Text("Save",style: TextStyle(color: Colors.white),),
@@ -187,9 +183,9 @@ class SettingsState extends State<Settings>{
                                           children: [
                                             TextSpan(text:"You need to drink "),
                                             TextSpan(text:"${goal.toStringAsFixed(1)}", style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.blue,
-                                              fontSize: 21
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.blue,
+                                                fontSize: 21
                                             )),
                                             TextSpan(text: " liters of water\n"),
                                             TextSpan(text:"Your BMI is "),
@@ -212,84 +208,84 @@ class SettingsState extends State<Settings>{
                           }else{
                             return Container();
                           }
-                    }),
+                        }),
                   ],
                 ),
-                  Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Container(
-                          margin: EdgeInsets.all(32),
-                          child: FlatButton(
-                            onPressed: (){
-                              showDialog(
-                                  context: context,
-                                  barrierDismissible: true,
-                                  builder: (_){
-                                    var style = TextStyle(
-                                        fontWeight: FontWeight.w700,
-                                        color: Colors.black);
+                Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Container(
+                        margin: EdgeInsets.all(32),
+                        child: FlatButton(
+                          onPressed: (){
+                            showDialog(
+                                context: context,
+                                barrierDismissible: true,
+                                builder: (_){
+                                  var style = TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.black);
 
-                                    return AlertDialog(
-                                        elevation: 2,
+                                  return AlertDialog(
+                                      elevation: 2,
 
-                                        backgroundColor: Colors.white,
-                                        title: Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                            children:[
-                                              Text(
-                                                "IMC                Situation",
-                                                style: TextStyle(
-                                                  color: Colors.blue,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ]
-                                        ),
-                                        content: Row(
+                                      backgroundColor: Colors.white,
+                                      title: Row(
                                           mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                          children: [
-                                            Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Text("16 to 19.9",style: style),
-                                                Text("20 to 24.9",style: style),
-                                                Text("25 to 29.9",style: style),
-                                                Text("30 to 39.9",style: style),
-                                                Text(">40",style: style),
-                                              ],
+                                          children:[
+                                            Text(
+                                              "IMC                Situation",
+                                              style: TextStyle(
+                                                color: Colors.blue,
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                             ),
-                                            Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Text("Underweight",style: style),
-                                                Text("Normal",style: style),
-                                                Text("Overweight",style: style),
-                                                Text("Obese",style: style),
-                                                Text("Extremely Obese",style: style),
-                                              ],
-                                            )
-                                          ],
-                                        )
-                                    );
-                                  }
-                              );
-                            },
-                            child: Text(
-                              "HELP",
-                              style: TextStyle(color: Color.fromRGBO(0,0, 0, 0.3)),
-                            ),
-                            splashColor: Color.fromRGBO(255, 255, 255, 0.5),
-                            highlightColor: Color.fromRGBO(255, 255, 255, 0.4),
+                                          ]
+                                      ),
+                                      content: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                        children: [
+                                          Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text("16 to 19.9",style: style),
+                                              Text("20 to 24.9",style: style),
+                                              Text("25 to 29.9",style: style),
+                                              Text("30 to 39.9",style: style),
+                                              Text(">40",style: style),
+                                            ],
+                                          ),
+                                          Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text("Underweight",style: style),
+                                              Text("Normal",style: style),
+                                              Text("Overweight",style: style),
+                                              Text("Obese",style: style),
+                                              Text("Extremely Obese",style: style),
+                                            ],
+                                          )
+                                        ],
+                                      )
+                                  );
+                                }
+                            );
+                          },
+                          child: Text(
+                            "HELP",
+                            style: TextStyle(color: Color.fromRGBO(0,0, 0, 0.3)),
                           ),
+                          splashColor: Color.fromRGBO(255, 255, 255, 0.5),
+                          highlightColor: Color.fromRGBO(255, 255, 255, 0.4),
                         ),
-                      ],
-                    ),
-                  )
-      ]
-              ),
-            ),
+                      ),
+                    ],
+                  ),
+                )
+              ]
+          ),
+        ),
       ),
     );
   }
@@ -308,11 +304,11 @@ class SettingsState extends State<Settings>{
     sleepMinutes = (prefs.getInt('sleepMinutes') ?? 00);
     name = prefs.getString('name') ?? "Adrielly";
 
-    //print([height, weight, bmi, goal, name]);
+    print([height, weight, bmi, goal, name]);
     return [height, weight, bmi, goal, name];
   }
 
-  Future<void> saveData(BuildContext context, Future _getData) async{
+  Future<void> saveData(BuildContext context) async{
 
     // The body needs 35ml for every 1kg of the body
     goal = 0.035 * double.parse(double.parse(controllerWeight.text).toStringAsFixed(1));
@@ -332,10 +328,10 @@ class SettingsState extends State<Settings>{
     prefs.setString("name", controllerName.text);
 
     Scaffold.of(context).showSnackBar(
-      SnackBar(content: Text("Saved Successfully"))
+        SnackBar(content: Text("Saved Successfully"))
     );
     setState(() {
-      _getData = getData();
+      getData();
     });
   }
 
@@ -371,14 +367,9 @@ class SettingsState extends State<Settings>{
     }
   }
 
-  Future<void> resetData(Future _getData) async {
+  Future<void> resetData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    for(int i=0;i<=6; i++){
-      prefs.setDouble("drank$i", 0);
-      prefs.setDouble("needToDrink$i", goal);
-      prefs.setDouble("percentage$i", 0);
-    }
-    _getData = getData();
+    prefs.setBool("reset_manually", true);
   }
 
 }

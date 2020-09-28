@@ -45,7 +45,7 @@ class CardWaterState extends State<CardWater>{
                             text: TextSpan(
                                 children: [
                                   TextSpan(
-                                    text: "150 ml",
+                                    text: "100 ml",
                                     style: TextStyle(
                                         color: Color.fromRGBO(102, 180, 255, 1),
                                         fontSize: 16,
@@ -140,7 +140,7 @@ class CardWaterState extends State<CardWater>{
                             text: TextSpan(
                                 children: [
                                   TextSpan(
-                                    text: "150 ml",
+                                    text: "200 ml",
                                     style: TextStyle(
                                         color: Color.fromRGBO(102, 180, 255, 1),
                                         fontSize: 16,
@@ -188,7 +188,7 @@ class CardWaterState extends State<CardWater>{
                             text: TextSpan(
                                 children: [
                                   TextSpan(
-                                    text: "150 ml",
+                                    text: "250 ml",
                                     style: TextStyle(
                                         color: Color.fromRGBO(102, 180, 255, 1),
                                         fontSize: 16,
@@ -235,7 +235,7 @@ class CardWaterState extends State<CardWater>{
                             text: TextSpan(
                                 children: [
                                   TextSpan(
-                                    text: "150 ml",
+                                    text: "300 ml",
                                     style: TextStyle(
                                         color: Color.fromRGBO(102, 180, 255, 1),
                                         fontSize: 16,
